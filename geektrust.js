@@ -24,26 +24,26 @@ fs.readFile(filename, "utf8", (err, data) => {
         let inputLines = data.toString().split("\n").map(t => t.trim());
         inputLines.forEach(command => {
             if (command.includes("BALANCE")) {
-                let parsedCommmand = command.split(" ");
-                if ( PASSENGER_DATA[parsedCommmand[1]] === undefined ) {
-                    PASSENGER_DATA[parsedCommmand[1]] = {};
+                let [commandName, passenger, balance] = command.split(" ");
+                if ( PASSENGER_DATA[passenger] === undefined ) {
+                    PASSENGER_DATA[passenger] = {};
                 }
-                PASSENGER_DATA[parsedCommmand[1]].balance = Number(parsedCommmand[2]);
+                PASSENGER_DATA[passenger].balance = Number(balance);
             }
     
             if (command.includes("CHECK_IN")) {
-                let parsedCommmand = command.split(" ");
-    
-                if (PASSENGER_DATA[parsedCommmand[1]] === undefined) {
-                    PASSENGER_DATA[parsedCommmand[1]] = {};
+                let [commandName, passenger, passengerType, passengerBoardingStation] = command.split(" ");
+                
+                if (PASSENGER_DATA[passenger] === undefined) {
+                    PASSENGER_DATA[passenger] = {};
                 }
     
-                PASSENGER_DATA[parsedCommmand[1]].type = parsedCommmand[2];
+                PASSENGER_DATA[passenger].type = passengerType;
     
-                if (PASSENGER_DATA[parsedCommmand[1]].station === undefined) {
-                    PASSENGER_DATA[parsedCommmand[1]].station = [];
+                if (PASSENGER_DATA[passenger].station === undefined) {
+                    PASSENGER_DATA[passenger].station = [];
                 }
-                PASSENGER_DATA[parsedCommmand[1]].station.push(parsedCommmand[3]);
+                PASSENGER_DATA[passenger].station.push(passengerBoardingStation);
             }
 
             if (command.includes("PRINT_SUMMARY")) {
