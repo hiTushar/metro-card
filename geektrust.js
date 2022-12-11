@@ -78,11 +78,7 @@ fs.readFile(filename, "utf8", (err, data) => {
                             STATION_DATA[station] = {
                                 collection: 0,
                                 discount: 0,
-                                passengerTypes: {
-                                    ADULT: 0,
-                                    SENIOR_CITIZEN: 0,
-                                    KID: 0
-                                }
+                                passengerTypes: []
                             }
                         }
 
@@ -103,7 +99,23 @@ fs.readFile(filename, "utf8", (err, data) => {
                         
                         STATION_DATA[station].collection += costOfTicket + serviceChargeAmount;
 
-                        STATION_DATA[station].passengerTypes[PASSENGER_DATA[passenger].type]++;
+                        // collect amount collection across passenger types
+                        if (!STATION_DATA[station].passengerTypes.find(pType => pType.type === PASSENGER_DATA[passenger].type)) {
+                            STATION_DATA[station].passengerTypes.push(
+                                {
+                                    type: PASSENGER_DATA[passenger].type,
+                                    count: 0,
+                                    collection: 0
+                                }
+                            );    
+                        }
+
+                        STATION_DATA[station].passengerTypes.forEach(pType => {
+                            if(pType.type === PASSENGER_DATA[passenger].type) {
+                                pType.count++;
+                                pType.collection = costOfTicket + serviceChargeAmount;
+                            }
+                        })
                     })
                 });
 
@@ -111,10 +123,27 @@ fs.readFile(filename, "utf8", (err, data) => {
                     currentStationData = STATION_DATA[station];
                     console.log("TOTAL_COLLECTION", station, currentStationData.collection, currentStationData.discount);
                     console.log("PASSENGER_TYPE_SUMMARY");
-                    Object.keys(currentStationData.passengerTypes).forEach(type => {
-                        if(currentStationData.passengerTypes[type] > 0) {
-                            console.log(type, currentStationData.passengerTypes[type]);
+
+                    currentStationData.passengerTypes.sort((a, b) => b.collection - a.collection);
+                    
+                    let sortTypewise = 0;
+                    currentStationData.passengerTypes.forEach((pType, index) => {
+                        if (currentStationData.passengerTypes.find((pTypeNext, indexNext) => pTypeNext.count === pType.count && index !== indexNext)) { // check if similar count is present in the station passenger data, to sort passenger typewise
+                            sortTypewise = 1;
                         }
+                    });
+
+                    if (sortTypewise) {
+                        currentStationData.passengerTypes.sort((a, b) => {
+                            if(a.type > b.type) return 1;
+                            else if (a.type < b.type) return -1;
+                            else if (a.type === b.type) return 0;
+                        })
+                    }
+                    
+                    currentStationData.passengerTypes.forEach(pType => {
+                        const { type, count } = pType;
+                        console.log(type, count);
                     });
                 });                
             }
